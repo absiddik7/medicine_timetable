@@ -53,7 +53,7 @@
           </button>
           <div class="dropdown-menu" id="exportDropdown">
             <button onclick="window.exportToPdf()" class="dropdown-item">
-              <i class="fa-solid fa-file-pdf text-red"></i> সরাসরি PDF ফাইল ডাউনলোড (.pdf)
+              <i class="fa-solid fa-file-pdf text-red"></i> ১ পেজে ভেক্টর PDF সেভ করুন (Save as PDF)
             </button>
             <button onclick="window.exportToWord()" class="dropdown-item">
               <i class="fa-solid fa-file-word text-primary"></i> Word Document ডাউনলোড (.doc)
@@ -114,19 +114,17 @@
           <div class="card-body">
             
             <div class="form-group">
-              <label for="medName">ওষুধের নাম ও পাওয়ার: <span class="required">*</span></label>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.25rem;">
+                <label for="medName" style="margin-bottom: 0;">ওষুধের নাম ও পাওয়ার: <span class="required">*</span></label>
+                <small style="color: #64748b; font-size: 0.78rem;"><i class="fa-solid fa-clock-rotate-left"></i> পূর্বে ব্যবহৃত ওষুধ সংরক্ষিত থাকে</small>
+              </div>
               <div class="input-with-clear">
-                <input type="text" id="medName" placeholder="উদাঃ র‍্যাবেকন ২০ বা পেরিটপ ৫০" autofocus>
-                <div class="quick-med-suggestions">
-                  <span class="suggestion-chip">র‍্যাবেকন 20</span>
-                  <span class="suggestion-chip">পেরিটপ 50</span>
-                  <span class="suggestion-chip">ফুসিন 40</span>
-                  <span class="suggestion-chip">কারভিসটা ১২.৫</span>
-                  <span class="suggestion-chip">মিগ ২.৫</span>
-                  <span class="suggestion-chip">সিলোস্টা</span>
-                  <span class="suggestion-chip">এনজিটর ১০</span>
-                  <span class="suggestion-chip">কারভা ৭৫</span>
-                  <span class="suggestion-chip">রোক্সাটাট</span>
+                <input type="text" id="medName" list="savedMedList" placeholder="উদাঃ র‍্যাবেকন ২০ বা পেরিটপ ৫০" autofocus autocomplete="off">
+                <datalist id="savedMedList">
+                  <!-- Dynamically populated from saved medicines -->
+                </datalist>
+                <div class="quick-med-suggestions" id="quickMedChipsContainer">
+                  <!-- Dynamically populated from saved medicines -->
                 </div>
               </div>
             </div>
@@ -608,8 +606,7 @@
                 <i class="fa-solid fa-calendar-check"></i>
               </div>
               <div class="other-title-wrap">
-                <h4>অন্যান্য ওষুধ ও বিশেষ দিন (Others / Weekly)</h4>
-                <span>— যেসব ওষুধ বিশেষ বারে খেতে হবে</span>
+                <h4>অন্যান্য ওষুধ</h4>
               </div>
             </div>
             <div class="other-body">

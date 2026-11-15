@@ -51,8 +51,114 @@ let appState = {
   }
 };
 
-// Storage Key
+// Storage Keys
 const STORAGE_KEY = "EASY_MED_TIME_SHEET_DATA_V3";
+const SAVED_MEDS_STORAGE_KEY = "EASY_MED_TIME_SHEET_SAVED_MEDS_V1";
+
+// Default Prescribed Medicines for Autocomplete Suggestions
+const DEFAULT_SAVED_MEDS = [
+  "র‍্যাবেকন 20",
+  "পেরিটপ 50",
+  "ফুসিন 40",
+  "মিগ ২.৫",
+  "সিলোস্টা",
+  "ভেরিগাট ২.৫",
+  "কারভা ৭৫",
+  "কারভিসটা ১২.৫",
+  "এনজিটর ১০",
+  "ফিনেরন",
+  "ইউরোম্যাক্স D",
+  "ডিক্যালট্রল",
+  "রোক্সাটাট",
+  "প্যারাসিটামল ৫০০",
+  "নাপা এক্সট্রা",
+  "অমিপ্রাজল ২০"
+];
+
+// Get Saved Medicines from LocalStorage
+function getSavedMedicines() {
+  try {
+    const saved = localStorage.getItem(SAVED_MEDS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn("Error reading saved medicines:", e);
+  }
+  return [...DEFAULT_SAVED_MEDS];
+}
+
+// Save Medicines list to LocalStorage
+function saveSavedMedicines(list) {
+  try {
+    localStorage.setItem(SAVED_MEDS_STORAGE_KEY, JSON.stringify(list));
+  } catch (e) {
+    console.warn("Error saving medicines list:", e);
+  }
+}
+
+// Add newly entered medicine name to persistent history
+function addSavedMedicine(name) {
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  const current = getSavedMedicines();
+  // Remove if duplicate (case-insensitive)
+  const filtered = current.filter(m => m.toLowerCase() !== trimmed.toLowerCase());
+  // Prepend to top so recently used appears first
+  filtered.unshift(trimmed);
+  // Cap at top 40 medicines
+  const updated = filtered.slice(0, 40);
+  saveSavedMedicines(updated);
+  renderSavedMedicineSuggestions();
+}
+
+// Remove medicine from saved suggestions
+window.removeSavedMedicine = function(nameToRemove, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const current = getSavedMedicines();
+  const updated = current.filter(m => m !== nameToRemove);
+  saveSavedMedicines(updated);
+  renderSavedMedicineSuggestions();
+};
+
+// Select saved medicine name into the input field
+window.selectSavedMedicine = function(name) {
+  const input = document.getElementById("medName");
+  if (input) {
+    input.value = name;
+    input.focus();
+  }
+};
+
+// Render saved medicine suggestions in both Datalist and Interactive Chips
+function renderSavedMedicineSuggestions() {
+  const list = getSavedMedicines();
+  
+  // 1. Datalist for automatic browser suggestions as user types
+  const datalist = document.getElementById("savedMedList");
+  if (datalist) {
+    datalist.innerHTML = list.map(m => `<option value="${escapeHtml(m)}"></option>`).join("");
+  }
+
+  // 2. Interactive quick-click chips below input field
+  const chipsContainer = document.getElementById("quickMedChipsContainer");
+  if (chipsContainer) {
+    const topChips = list.slice(0, 10);
+    chipsContainer.innerHTML = topChips.map(m => {
+      const escaped = escapeHtml(m);
+      return `
+        <span class="suggestion-chip" onclick="window.selectSavedMedicine('${escaped}')" title="ইনপুটে বসাতে ক্লিক করুন">
+          ${escaped}
+          <span class="remove-med-chip" onclick="window.removeSavedMedicine('${escaped}', event)" title="তালিকা থেকে মুছুন">&times;</span>
+        </span>
+      `;
+    }).join("");
+  }
+}
 
 // Convert English digits to Bengali digits
 function toBengaliNum(num) {
@@ -358,6 +464,9 @@ function handleAddMedicine() {
     });
   });
 
+  // Save medicine name into persistent storage for future autocomplete
+  addSavedMedicine(name);
+
   // Reset form
   nameInput.value = "";
   daysInput.value = "";
@@ -423,6 +532,11 @@ function handleSaveEdit() {
   item.timing = document.getElementById("editMealTiming").value;
   item.days = document.getElementById("editMedDays").value.trim();
 
+  // Save updated medicine name into persistent storage
+  if (item.name) {
+    addSavedMedicine(item.name);
+  }
+
   document.getElementById("editModal").classList.remove("active");
   renderAll();
 }
@@ -436,49 +550,9 @@ window.printChart = function() {
   window.print();
 };
 
-// 2. Export to PDF file using html2pdf with font pre-warming & strict 1-page bounds
-window.exportToPdf = async function() {
-  const element = document.getElementById("medicineSheet");
-  const patientName = appState.data.patientName || "Medicine_Schedule";
-  const cleanName = patientName.replace(/[^a-zA-Z0-9\u0980-\u09FF]/g, '_');
-  
-  // Wait for all fonts to finish loading
-  if (document.fonts && document.fonts.ready) {
-    try {
-      await document.fonts.ready;
-    } catch (e) {
-      console.warn("Font ready check error:", e);
-    }
-  }
-
-  const opt = {
-    margin: [3, 4, 3, 4],
-    filename: `${cleanName}_Med_Chart_1Page.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { 
-      scale: 2.5, 
-      useCORS: true, 
-      letterRendering: false,
-      logging: false,
-      scrollY: 0,
-      scrollX: 0
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: appState.settings.pageOrientation }
-  };
-
-  const btn = event?.currentTarget || document.getElementById("downloadPdfBtn");
-  const origText = btn ? btn.innerHTML : "";
-  if (btn) btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> প্রস্তুত হচ্ছে...`;
-
-  try {
-    await html2pdf().set(opt).from(element).save();
-    if (btn) btn.innerHTML = origText;
-  } catch (err) {
-    console.error("PDF generation error:", err);
-    alert("টিপস: ব্রাউজারের প্রিন্ট ডায়ালগ (Print / Save as PDF) ব্যবহার করলে ১০০% নিখুঁত ভেক্টর ফন্টে ১ পৃষ্ঠায় সেভ হয়।");
-    if (btn) btn.innerHTML = origText;
-    window.print();
-  }
+// 2. Export to PDF (Native 100% Vector PDF with Zero Bengali Ligature Breakage)
+window.exportToPdf = function() {
+  window.print();
 };
 
 // 3. Export to Word (.doc compatible HTML)
@@ -558,7 +632,7 @@ window.exportToWord = function() {
       </table>
 
       ${d.other && d.other.length > 0 ? `
-        <h3 style="margin-top: 8pt; margin-bottom: 4pt; font-size: 11pt;">অন্যান্য ওষুধ ও বিশেষ দিন (Others / Weekly)</h3>
+        <h3 style="margin-top: 8pt; margin-bottom: 4pt; font-size: 11pt;">অন্যান্য ওষুধ</h3>
         <table>
           <thead>
             <tr style="background-color: #f0fdf4;">
@@ -831,6 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("saveEditBtn").addEventListener("click", handleSaveEdit);
 
-  // Initial Render
+  // Initial Render & Suggestions
+  renderSavedMedicineSuggestions();
   renderAll();
 });
