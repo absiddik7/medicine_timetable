@@ -308,9 +308,9 @@ function handleAddMedicine() {
     return;
   }
 
-  const dose = doseInput.value.trim() || "১ টা";
-  const timing = timingRadio ? timingRadio.value : "";
-  const days = daysInput.value.trim();
+  const defaultDose = doseInput.value.trim() || "১ টা";
+  const defaultTiming = timingRadio ? timingRadio.value : "";
+  const defaultDays = daysInput.value.trim();
 
   // Check selected slots
   const slots = [];
@@ -324,14 +324,36 @@ function handleAddMedicine() {
     return;
   }
 
-  // Add item into each selected slot
+  const isPerSlot = document.getElementById("togglePerSlotDose")?.checked;
+
+  // Add item into each selected slot with flexible per-slot dose/timing
   slots.forEach(slotKey => {
+    let itemDose = defaultDose;
+    let itemTiming = defaultTiming;
+    let itemDays = defaultDays;
+
+    if (isPerSlot) {
+      if (slotKey === "morning") {
+        itemDose = document.getElementById("doseMorning").value.trim() || "১ টা";
+        itemTiming = document.getElementById("timingMorning").value;
+      } else if (slotKey === "noon") {
+        itemDose = document.getElementById("doseNoon").value.trim() || "১ টা";
+        itemTiming = document.getElementById("timingNoon").value;
+      } else if (slotKey === "night") {
+        itemDose = document.getElementById("doseNight").value.trim() || "১ টা";
+        itemTiming = document.getElementById("timingNight").value;
+      } else if (slotKey === "other") {
+        itemDose = document.getElementById("doseOther").value.trim() || "১ টা";
+        itemDays = document.getElementById("daysOther").value.trim() || "বিশেষ দিন";
+      }
+    }
+
     appState.data[slotKey].push({
       id: uid(),
       name: name,
-      dose: dose,
-      timing: timing,
-      days: (slotKey === "other" && !days) ? "বিশেষ দিন" : days,
+      dose: itemDose,
+      timing: itemTiming,
+      days: (slotKey === "other" && !itemDays) ? "বিশেষ দিন" : itemDays,
       note: ""
     });
   });
@@ -633,6 +655,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add Medicine Form Submission
   document.getElementById("addMedicineBtn").addEventListener("click", handleAddMedicine);
+
+  // Per-slot custom dose toggle handler & slot card visibility
+  const togglePerSlot = document.getElementById("togglePerSlotDose");
+  const commonSection = document.getElementById("commonDoseSection");
+  const perSlotContainer = document.getElementById("perSlotDoseContainer");
+
+  function updateSlotCardsVisibility() {
+    const isChecked = togglePerSlot ? togglePerSlot.checked : false;
+    if (commonSection) commonSection.style.display = isChecked ? "none" : "block";
+    if (perSlotContainer) perSlotContainer.style.display = isChecked ? "flex" : "none";
+
+    const morningCard = document.getElementById("slotCardMorning");
+    const noonCard = document.getElementById("slotCardNoon");
+    const nightCard = document.getElementById("slotCardNight");
+    const otherCard = document.getElementById("slotCardOther");
+
+    if (morningCard) morningCard.style.display = document.getElementById("slotMorning").checked ? "flex" : "none";
+    if (noonCard) noonCard.style.display = document.getElementById("slotNoon").checked ? "flex" : "none";
+    if (nightCard) nightCard.style.display = document.getElementById("slotNight").checked ? "flex" : "none";
+    if (otherCard) otherCard.style.display = document.getElementById("slotOther").checked ? "flex" : "none";
+  }
+
+  togglePerSlot?.addEventListener("change", updateSlotCardsVisibility);
+  document.getElementById("slotMorning")?.addEventListener("change", updateSlotCardsVisibility);
+  document.getElementById("slotNoon")?.addEventListener("change", updateSlotCardsVisibility);
+  document.getElementById("slotNight")?.addEventListener("change", updateSlotCardsVisibility);
+  document.getElementById("slotOther")?.addEventListener("change", updateSlotCardsVisibility);
+
+  // Mini dose buttons delegation
+  document.querySelectorAll(".mini-dose-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.getAttribute("data-target");
+      const val = btn.getAttribute("data-val");
+      const targetInput = document.getElementById(targetId);
+      if (targetInput) targetInput.value = val;
+    });
+  });
 
   // Quick Medicine Suggestion Chips
   document.querySelectorAll(".suggestion-chip").forEach(chip => {

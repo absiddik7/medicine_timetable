@@ -549,6 +549,84 @@ input[type="text"]:focus,
   border-color: #2563eb;
 }
 
+/* Per-Slot Custom Dosage & Timing Cards */
+.per-slot-dose-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.slot-dose-card {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 0.5rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: all 0.2s;
+}
+
+.slot-dose-card.morning-card { border-color: var(--col-morning-border); background: var(--col-morning-bg); }
+.slot-dose-card.noon-card { border-color: var(--col-noon-border); background: var(--col-noon-bg); }
+.slot-dose-card.night-card { border-color: var(--col-night-border); background: var(--col-night-bg); }
+.slot-dose-card.other-card { border-color: var(--col-other-border); background: var(--col-other-bg); }
+
+.slot-card-header {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slot-card-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.slot-card-inputs label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.slot-card-inputs input,
+.slot-card-inputs select {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.88rem;
+  border-radius: 4px;
+}
+
+.quick-mini-chips {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.quick-mini-chips span {
+  padding: 0.1rem 0.4rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.quick-mini-chips span:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
 /* Manage Tab Accordion */
 .accordion-group {
   display: flex;

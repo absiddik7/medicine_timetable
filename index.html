@@ -166,67 +166,185 @@
               </div>
             </div>
 
-            <!-- DOSE / QUANTITY -->
-            <div class="form-group">
-              <label for="medDose">পরিমাণ / ডোজ (কতটা খাবেন):</label>
-              <div class="dose-input-row">
-                <input type="text" id="medDose" placeholder="১ টা" value="১ টা">
-                <div class="quick-dose-chips">
-                  <button type="button" class="dose-chip" data-dose="১ টা">১ টা</button>
-                  <button type="button" class="dose-chip" data-dose="১/২ টা">১/২ টা (অর্ধেক)</button>
-                  <button type="button" class="dose-chip" data-dose="১.৫ টা">১.৫ টা</button>
-                  <button type="button" class="dose-chip" data-dose="২ টা">২ টা</button>
-                  <button type="button" class="dose-chip" data-dose="১ চামচ">১ চামচ</button>
+            <!-- PER-SLOT DOSE TOGGLE -->
+            <div class="form-group" style="margin-top: 0.35rem; margin-bottom: 0.6rem;">
+              <label class="checkbox-toggle" style="font-weight: 700; color: #1e40af; background: #eff6ff; padding: 0.45rem 0.65rem; border-radius: 6px; border: 1.5px solid #bfdbfe; cursor: pointer;">
+                <input type="checkbox" id="togglePerSlotDose">
+                <span>বেলাভেদে আলাদা ডোজ ও নিয়ম দিন (যেমনঃ সকালে ২টি, দুপুরে ১টি)</span>
+              </label>
+            </div>
+
+            <!-- MODE 1: COMMON DOSE FOR ALL SELECTED SLOTS -->
+            <div id="commonDoseSection">
+              <!-- DOSE / QUANTITY -->
+              <div class="form-group">
+                <label for="medDose">পরিমাণ / ডোজ (কতটা খাবেন):</label>
+                <div class="dose-input-row">
+                  <input type="text" id="medDose" placeholder="১ টা" value="১ টা">
+                  <div class="quick-dose-chips">
+                    <button type="button" class="dose-chip" data-dose="১ টা">১ টা</button>
+                    <button type="button" class="dose-chip" data-dose="১/২ টা">১/২ টা (অর্ধেক)</button>
+                    <button type="button" class="dose-chip" data-dose="১.৫ টা">১.৫ টা</button>
+                    <button type="button" class="dose-chip" data-dose="২ টা">২ টা</button>
+                    <button type="button" class="dose-chip" data-dose="১ চামচ">১ চামচ</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MEAL TIMING (BEFORE / AFTER MEAL) -->
+              <div class="form-group">
+                <label>খাবারের আগে না পরে (২য় লাইনে ছোট্ট করে থাকবে):</label>
+                <div class="meal-timing-radios">
+                  <label class="radio-chip">
+                    <input type="radio" name="mealTiming" value="খাবার আগে" checked>
+                    <span class="chip-label text-warning-dark">
+                      খাবার আগে
+                    </span>
+                  </label>
+                  <label class="radio-chip">
+                    <input type="radio" name="mealTiming" value="খাবার পরে">
+                    <span class="chip-label text-success-dark">
+                      খাবার পরে
+                    </span>
+                  </label>
+                  <label class="radio-chip">
+                    <input type="radio" name="mealTiming" value="খাবারের সাথে">
+                    <span class="chip-label">
+                      খাবারের সাথে
+                    </span>
+                  </label>
+                  <label class="radio-chip">
+                    <input type="radio" name="mealTiming" value="খালি পেটে">
+                    <span class="chip-label">
+                      খালি পেটে
+                    </span>
+                  </label>
+                  <label class="radio-chip">
+                    <input type="radio" name="mealTiming" value="">
+                    <span class="chip-label">
+                      কোনোটি নয়
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- DAYS SPECIFICATION -->
+              <div class="form-group" id="daysGroup">
+                <label for="medDays">কোন কোন দিন বা বিশেষ সময় (ঐচ্ছিক):</label>
+                <input type="text" id="medDays" placeholder="উদাঃ রবিবার ও মঙ্গলবার">
+                <div class="quick-days-chips">
+                  <button type="button" class="day-chip" data-day="প্রতিদিন">প্রতিদিন</button>
+                  <button type="button" class="day-chip" data-day="রবিবার ও মঙ্গলবার">রবিবার ও মঙ্গলবার</button>
+                  <button type="button" class="day-chip" data-day="১ দিন পর পর">১ দিন পর পর</button>
+                  <button type="button" class="day-chip" data-day="প্রয়োজন হলে">প্রয়োজন হলে</button>
                 </div>
               </div>
             </div>
 
-            <!-- MEAL TIMING (BEFORE / AFTER MEAL) -->
-            <div class="form-group">
-              <label>খাবারের আগে না পরে (২য় লাইনে ছোট্ট করে থাকবে):</label>
-              <div class="meal-timing-radios">
-                <label class="radio-chip">
-                  <input type="radio" name="mealTiming" value="খাবার আগে" checked>
-                  <span class="chip-label text-warning-dark">
-                    খাবার আগে
-                  </span>
-                </label>
-                <label class="radio-chip">
-                  <input type="radio" name="mealTiming" value="খাবার পরে">
-                  <span class="chip-label text-success-dark">
-                    খাবার পরে
-                  </span>
-                </label>
-                <label class="radio-chip">
-                  <input type="radio" name="mealTiming" value="খাবারের সাথে">
-                  <span class="chip-label">
-                    খাবারের সাথে
-                  </span>
-                </label>
-                <label class="radio-chip">
-                  <input type="radio" name="mealTiming" value="খালি পেটে">
-                  <span class="chip-label">
-                    খালি পেটে
-                  </span>
-                </label>
-                <label class="radio-chip">
-                  <input type="radio" name="mealTiming" value="">
-                  <span class="chip-label">
-                    কোনোটি নয়
-                  </span>
-                </label>
+            <!-- MODE 2: CUSTOM PER-SLOT DOSAGE & TIMING -->
+            <div id="perSlotDoseContainer" style="display: none;" class="per-slot-dose-container">
+              <!-- Morning Slot Card -->
+              <div class="slot-dose-card morning-card" id="slotCardMorning">
+                <div class="slot-card-header">
+                  <span class="badge morning-badge"><i class="fa-solid fa-cloud-sun"></i> সকালের ডোজ ও নিয়ম:</span>
+                </div>
+                <div class="slot-card-inputs">
+                  <div class="slot-input-dose">
+                    <label>ডোজ:</label>
+                    <input type="text" id="doseMorning" value="২ টা" placeholder="উদাঃ ২ টা">
+                    <div class="quick-mini-chips">
+                      <span class="mini-dose-btn" data-target="doseMorning" data-val="১ টা">১</span>
+                      <span class="mini-dose-btn" data-target="doseMorning" data-val="১/২ টা">১/২</span>
+                      <span class="mini-dose-btn" data-target="doseMorning" data-val="১.৫ টা">১.৫</span>
+                      <span class="mini-dose-btn" data-target="doseMorning" data-val="২ টা">২</span>
+                    </div>
+                  </div>
+                  <div class="slot-input-timing">
+                    <label>খাওয়ার নিয়ম:</label>
+                    <select id="timingMorning" class="form-select">
+                      <option value="খাবার আগে" selected>খাবার আগে</option>
+                      <option value="খাবার পরে">খাবার পরে</option>
+                      <option value="খাবারের সাথে">খাবারের সাথে</option>
+                      <option value="খালি পেটে">খালি পেটে</option>
+                      <option value="">কোনোটি নয়</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <!-- DAYS SPECIFICATION -->
-            <div class="form-group" id="daysGroup">
-              <label for="medDays">কোন কোন দিন বা বিশেষ সময় (ঐচ্ছিক):</label>
-              <input type="text" id="medDays" placeholder="উদাঃ রবিবার ও মঙ্গলবার">
-              <div class="quick-days-chips">
-                <button type="button" class="day-chip" data-day="প্রতিদিন">প্রতিদিন</button>
-                <button type="button" class="day-chip" data-day="রবিবার ও মঙ্গলবার">রবিবার ও মঙ্গলবার</button>
-                <button type="button" class="day-chip" data-day="১ দিন পর পর">১ দিন পর পর</button>
-                <button type="button" class="day-chip" data-day="প্রয়োজন হলে">প্রয়োজন হলে</button>
+              <!-- Noon Slot Card -->
+              <div class="slot-dose-card noon-card" id="slotCardNoon" style="display: none;">
+                <div class="slot-card-header">
+                  <span class="badge noon-badge"><i class="fa-solid fa-sun"></i> দুপুরের ডোজ ও নিয়ম:</span>
+                </div>
+                <div class="slot-card-inputs">
+                  <div class="slot-input-dose">
+                    <label>ডোজ:</label>
+                    <input type="text" id="doseNoon" value="১ টা" placeholder="উদাঃ ১ টা">
+                    <div class="quick-mini-chips">
+                      <span class="mini-dose-btn" data-target="doseNoon" data-val="১ টা">১</span>
+                      <span class="mini-dose-btn" data-target="doseNoon" data-val="১/২ টা">১/২</span>
+                      <span class="mini-dose-btn" data-target="doseNoon" data-val="১.৫ টা">১.৫</span>
+                      <span class="mini-dose-btn" data-target="doseNoon" data-val="২ টা">২</span>
+                    </div>
+                  </div>
+                  <div class="slot-input-timing">
+                    <label>খাওয়ার নিয়ম:</label>
+                    <select id="timingNoon" class="form-select">
+                      <option value="খাবার আগে">খাবার আগে</option>
+                      <option value="খাবার পরে" selected>খাবার পরে</option>
+                      <option value="খাবারের সাথে">খাবারের সাথে</option>
+                      <option value="খালি পেটে">খালি পেটে</option>
+                      <option value="">কোনোটি নয়</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Night Slot Card -->
+              <div class="slot-dose-card night-card" id="slotCardNight">
+                <div class="slot-card-header">
+                  <span class="badge night-badge"><i class="fa-solid fa-moon"></i> রাতের ডোজ ও নিয়ম:</span>
+                </div>
+                <div class="slot-card-inputs">
+                  <div class="slot-input-dose">
+                    <label>ডোজ:</label>
+                    <input type="text" id="doseNight" value="১ টা" placeholder="উদাঃ ১ টা">
+                    <div class="quick-mini-chips">
+                      <span class="mini-dose-btn" data-target="doseNight" data-val="১ টা">১</span>
+                      <span class="mini-dose-btn" data-target="doseNight" data-val="১/২ টা">১/২</span>
+                      <span class="mini-dose-btn" data-target="doseNight" data-val="১.৫ টা">১.৫</span>
+                      <span class="mini-dose-btn" data-target="doseNight" data-val="২ টা">২</span>
+                    </div>
+                  </div>
+                  <div class="slot-input-timing">
+                    <label>খাওয়ার নিয়ম:</label>
+                    <select id="timingNight" class="form-select">
+                      <option value="খাবার আগে">খাবার আগে</option>
+                      <option value="খাবার পরে" selected>খাবার পরে</option>
+                      <option value="খাবারের সাথে">খাবারের সাথে</option>
+                      <option value="খালি পেটে">খালি পেটে</option>
+                      <option value="">কোনোটি নয়</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Other Slot Card -->
+              <div class="slot-dose-card other-card" id="slotCardOther" style="display: none;">
+                <div class="slot-card-header">
+                  <span class="badge other-badge"><i class="fa-solid fa-calendar-days"></i> অন্যান্য/বিশেষ দিনের ডোজ:</span>
+                </div>
+                <div class="slot-card-inputs">
+                  <div class="slot-input-dose">
+                    <label>ডোজ:</label>
+                    <input type="text" id="doseOther" value="১ টা" placeholder="উদাঃ ১ টা">
+                  </div>
+                  <div class="slot-input-timing">
+                    <label>দিন বা নিয়ম:</label>
+                    <input type="text" id="daysOther" placeholder="উদাঃ রবিবার ও মঙ্গলবার">
+                  </div>
+                </div>
               </div>
             </div>
 
