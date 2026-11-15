@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>সহজ প্রেসক্রিপশন ও ওষুধের সময়সূচী (Easy Medicine Timetable)</title>
+  
+  <!-- Bengali Google Fonts with Nirmala UI system fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for clean icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- html2pdf & html2canvas for direct PDF and Image exports -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-friendly font-size-xl">
+
+  <!-- TOP APP BAR -->
+  <header class="app-header no-print">
+    <div class="header-content">
+      <div class="brand">
+        <div class="logo-icon">
+          <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <div>
+          <h1>সহজ ওষুধের সময়সূচী (Easy Medicine Chart)</h1>
+          <p>বাবার পড়ার জন্য স্পষ্ট ও বড় হরফে ১ পৃষ্ঠায় A4 চার্ট</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="loadPresetBtn" class="btn btn-secondary" title="আব্দুল ওয়াহাব সাহেবের নমুনা প্রেসক্রিপশন লোড করুন">
+          <i class="fa-solid fa-rotate-left"></i> নমুনা ডেটা
+        </button>
+        <button id="clearAllBtn" class="btn btn-outline" title="সব ওষুধ মুছে নতুন করে শুরু করুন">
+          <i class="fa-solid fa-trash-can"></i> নতুন চার্ট
+        </button>
+        
+        <!-- DIRECT 1-PAGE PRINT / PDF BUTTON -->
+        <button onclick="window.printChart()" class="btn btn-primary" title="১ পৃষ্ঠায় প্রিন্ট বা Save as PDF করুন">
+          <i class="fa-solid fa-print"></i> ১ পেজে প্রিন্ট / Save as PDF
+        </button>
+
+        <div class="export-dropdown">
+          <button class="btn btn-outline" id="downloadMenuBtn">
+            <i class="fa-solid fa-download"></i> অন্যান্য ডাউনলোড <i class="fa-solid fa-chevron-down ml-1"></i>
+          </button>
+          <div class="dropdown-menu" id="exportDropdown">
+            <button onclick="window.exportToPdf()" class="dropdown-item">
+              <i class="fa-solid fa-file-pdf text-red"></i> সরাসরি PDF ফাইল ডাউনলোড (.pdf)
+            </button>
+            <button onclick="window.exportToWord()" class="dropdown-item">
+              <i class="fa-solid fa-file-word text-primary"></i> Word Document ডাউনলোড (.doc)
+            </button>
+            <button onclick="window.exportToImage()" class="dropdown-item">
+              <i class="fa-solid fa-image text-green"></i> ছবি আকারে ডাউনলোড (PNG Image)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER WITH SPLIT LAYOUT -->
+  <main class="main-layout">
+    
+    <!-- LEFT PANEL: CONTROLS & FORM (NO-PRINT) -->
+    <aside class="editor-panel no-print">
+      
+      <!-- NAVIGATION TABS FOR EDITOR -->
+      <div class="panel-tabs">
+        <button class="tab-btn active" data-tab="tab-add">
+          <i class="fa-solid fa-plus-circle"></i> ওষুধ যোগ
+        </button>
+        <button class="tab-btn" data-tab="tab-manage">
+          <i class="fa-solid fa-list-check"></i> সাজানো ও তালিকা
+        </button>
+        <button class="tab-btn" data-tab="tab-settings">
+          <i class="fa-solid fa-sliders"></i> কাস্টমাইজ
+        </button>
+      </div>
+
+      <!-- TAB 1: ADD MEDICINE FORM -->
+      <div class="tab-content active" id="tab-add">
+        
+        <!-- PATIENT INFO SECTION -->
+        <div class="card patient-info-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-user-injured text-primary"></i> রোগীর তথ্য (Patient Info)</h3>
+          </div>
+          <div class="card-body grid-2">
+            <div class="form-group">
+              <label for="patientName">রোগীর নাম:</label>
+              <input type="text" id="patientName" placeholder="উদাঃ আব্দুল ওয়াহাব" value="আব্দুল ওয়াহাব">
+            </div>
+            <div class="form-group">
+              <label for="prescriptionDate">তারিখ:</label>
+              <input type="text" id="prescriptionDate" placeholder="উদাঃ 19 Oct, 2025" value="19 Oct, 2025">
+            </div>
+          </div>
+        </div>
+
+        <!-- MEDICINE ENTRY FORM -->
+        <div class="card medicine-entry-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-capsules text-secondary"></i> নতুন ওষুধ যুক্ত করুন</h3>
+          </div>
+          <div class="card-body">
+            
+            <div class="form-group">
+              <label for="medName">ওষুধের নাম ও পাওয়ার: <span class="required">*</span></label>
+              <div class="input-with-clear">
+                <input type="text" id="medName" placeholder="উদাঃ র‍্যাবেকন ২০ বা পেরিটপ ৫০" autofocus>
+                <div class="quick-med-suggestions">
+                  <span class="suggestion-chip">র‍্যাবেকন 20</span>
+                  <span class="suggestion-chip">পেরিটপ 50</span>
+                  <span class="suggestion-chip">ফুসিন 40</span>
+                  <span class="suggestion-chip">কারভিসটা ১২.৫</span>
+                  <span class="suggestion-chip">মিগ ২.৫</span>
+                  <span class="suggestion-chip">সিলোস্টা</span>
+                  <span class="suggestion-chip">এনজিটর ১০</span>
+                  <span class="suggestion-chip">কারভা ৭৫</span>
+                  <span class="suggestion-chip">রোক্সাটাট</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- DOSAGE TIME SELECTION (SLOTS) -->
+            <div class="form-group">
+              <label>খাওয়ার সময় / বেলা নির্বাচন করুন: <span class="required">*</span></label>
+              <div class="slot-checkbox-group">
+                <label class="slot-checkbox morning-slot">
+                  <input type="checkbox" id="slotMorning" value="morning" checked>
+                  <span class="slot-box">
+                    <i class="fa-solid fa-cloud-sun"></i>
+                    <strong>সকাল</strong>
+                  </span>
+                </label>
+                <label class="slot-checkbox noon-slot">
+                  <input type="checkbox" id="slotNoon" value="noon">
+                  <span class="slot-box">
+                    <i class="fa-solid fa-sun"></i>
+                    <strong>দুপুর</strong>
+                  </span>
+                </label>
+                <label class="slot-checkbox night-slot">
+                  <input type="checkbox" id="slotNight" value="night" checked>
+                  <span class="slot-box">
+                    <i class="fa-solid fa-moon"></i>
+                    <strong>রাত</strong>
+                  </span>
+                </label>
+                <label class="slot-checkbox other-slot">
+                  <input type="checkbox" id="slotOther" value="other">
+                  <span class="slot-box">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <strong>অন্যান্য</strong>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- DOSE / QUANTITY -->
+            <div class="form-group">
+              <label for="medDose">পরিমাণ / ডোজ (কতটা খাবেন):</label>
+              <div class="dose-input-row">
+                <input type="text" id="medDose" placeholder="১ টা" value="১ টা">
+                <div class="quick-dose-chips">
+                  <button type="button" class="dose-chip" data-dose="১ টা">১ টা</button>
+                  <button type="button" class="dose-chip" data-dose="১/২ টা">১/২ টা (অর্ধেক)</button>
+                  <button type="button" class="dose-chip" data-dose="১.৫ টা">১.৫ টা</button>
+                  <button type="button" class="dose-chip" data-dose="২ টা">২ টা</button>
+                  <button type="button" class="dose-chip" data-dose="১ চামচ">১ চামচ</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- MEAL TIMING (BEFORE / AFTER MEAL) -->
+            <div class="form-group">
+              <label>খাবারের আগে না পরে (২য় লাইনে ছোট্ট করে থাকবে):</label>
+              <div class="meal-timing-radios">
+                <label class="radio-chip">
+                  <input type="radio" name="mealTiming" value="খাবার আগে" checked>
+                  <span class="chip-label text-warning-dark">
+                    খাবার আগে
+                  </span>
+                </label>
+                <label class="radio-chip">
+                  <input type="radio" name="mealTiming" value="খাবার পরে">
+                  <span class="chip-label text-success-dark">
+                    খাবার পরে
+                  </span>
+                </label>
+                <label class="radio-chip">
+                  <input type="radio" name="mealTiming" value="খাবারের সাথে">
+                  <span class="chip-label">
+                    খাবারের সাথে
+                  </span>
+                </label>
+                <label class="radio-chip">
+                  <input type="radio" name="mealTiming" value="খালি পেটে">
+                  <span class="chip-label">
+                    খালি পেটে
+                  </span>
+                </label>
+                <label class="radio-chip">
+                  <input type="radio" name="mealTiming" value="">
+                  <span class="chip-label">
+                    কোনোটি নয়
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- DAYS SPECIFICATION -->
+            <div class="form-group" id="daysGroup">
+              <label for="medDays">কোন কোন দিন বা বিশেষ সময় (ঐচ্ছিক):</label>
+              <input type="text" id="medDays" placeholder="উদাঃ রবিবার ও মঙ্গলবার">
+              <div class="quick-days-chips">
+                <button type="button" class="day-chip" data-day="প্রতিদিন">প্রতিদিন</button>
+                <button type="button" class="day-chip" data-day="রবিবার ও মঙ্গলবার">রবিবার ও মঙ্গলবার</button>
+                <button type="button" class="day-chip" data-day="১ দিন পর পর">১ দিন পর পর</button>
+                <button type="button" class="day-chip" data-day="প্রয়োজন হলে">প্রয়োজন হলে</button>
+              </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button id="addMedicineBtn" class="btn btn-primary btn-block">
+              <i class="fa-solid fa-plus"></i> তালিকায় ওষুধটি যোগ করুন
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MANAGE & REORDER MEDICINES -->
+      <div class="tab-content" id="tab-manage">
+        <div class="manage-instructions" style="margin-bottom: 0.75rem; font-size: 0.88rem; color: #475569;">
+          <p><i class="fa-solid fa-circle-info text-primary"></i> তীর চিহ্নে ক্লিক করে ওষুধ উপরে/নিচে স্থানান্তর ও এডিট করতে পারেন।</p>
+        </div>
+
+        <div class="accordion-group">
+          <!-- MORNING LIST -->
+          <div class="accordion-item" id="accMorning">
+            <div class="accordion-header">
+              <span class="badge morning-badge"><i class="fa-solid fa-cloud-sun"></i> সকাল</span>
+              <span class="count-pill" id="morningCount">০ টি</span>
+              <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="accordion-body">
+              <ul class="med-list" id="listMorning"></ul>
+            </div>
+          </div>
+
+          <!-- NOON LIST -->
+          <div class="accordion-item" id="accNoon">
+            <div class="accordion-header">
+              <span class="badge noon-badge"><i class="fa-solid fa-sun"></i> দুপুর</span>
+              <span class="count-pill" id="noonCount">০ টি</span>
+              <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="accordion-body">
+              <ul class="med-list" id="listNoon"></ul>
+            </div>
+          </div>
+
+          <!-- NIGHT LIST -->
+          <div class="accordion-item" id="accNight">
+            <div class="accordion-header">
+              <span class="badge night-badge"><i class="fa-solid fa-moon"></i> রাত</span>
+              <span class="count-pill" id="nightCount">০ টি</span>
+              <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="accordion-body">
+              <ul class="med-list" id="listNight"></ul>
+            </div>
+          </div>
+
+          <!-- OTHER LIST -->
+          <div class="accordion-item" id="accOther">
+            <div class="accordion-header">
+              <span class="badge other-badge"><i class="fa-solid fa-calendar-days"></i> অন্যান্য</span>
+              <span class="count-pill" id="otherCount">০ টি</span>
+              <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="accordion-body">
+              <ul class="med-list" id="listOther"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: CUSTOMIZE / FORMAT SETTINGS -->
+      <div class="tab-content" id="tab-settings">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-palette text-primary"></i> প্রিন্ট ও ডিজাইন কাস্টমাইজেশন</h3>
+          </div>
+          <div class="card-body">
+            
+            <!-- FONT SIZE ADJUSTMENT -->
+            <div class="form-group">
+              <label><i class="fa-solid fa-text-height"></i> লেখার সাইজ (বাবার পড়ার সুবিধার জন্য বড় করুন):</label>
+              <div class="font-size-options">
+                <button type="button" class="size-btn" data-size="font-size-md">মাঝারি (Normal)</button>
+                <button type="button" class="size-btn" data-size="font-size-lg">বড় (Large)</button>
+                <button type="button" class="size-btn active" data-size="font-size-xl">খুব বড় (Extra Large)</button>
+                <button type="button" class="size-btn" data-size="font-size-xxl">বিশাল (Huge)</button>
+              </div>
+            </div>
+
+            <!-- PAGE SCALE ADJUSTER -->
+            <div class="form-group">
+              <label><i class="fa-solid fa-compress"></i> ১ পেজে সাইজ অ্যাডজাস্টার (Page Fit Scale):</label>
+              <div class="font-size-options">
+                <button type="button" class="btn btn-outline btn-sm scale-btn active" data-scale="1">১০০% (সাধারণ)</button>
+                <button type="button" class="btn btn-outline btn-sm scale-btn" data-scale="0.95">৯৫% (ফিট)</button>
+                <button type="button" class="btn btn-outline btn-sm scale-btn" data-scale="0.90">৯০% (কমপ্যাক্ট)</button>
+                <button type="button" class="btn btn-outline btn-sm scale-btn" data-scale="0.85">৮৫% (সর্বোচ্চ)</button>
+              </div>
+            </div>
+
+            <!-- THEME / INK SAVER -->
+            <div class="form-group">
+              <label><i class="fa-solid fa-brush"></i> রঙের ধরন (Theme):</label>
+              <div class="theme-options">
+                <label class="theme-option active">
+                  <input type="radio" name="appTheme" value="theme-friendly" checked>
+                  <span><i class="fa-solid fa-heart text-pink"></i> রঙিন ও দৃষ্টিসুখকর (Soft Color)</span>
+                </label>
+                <label class="theme-option">
+                  <input type="radio" name="appTheme" value="theme-contrast">
+                  <span><i class="fa-solid fa-eye text-primary"></i> হাই-কনট্রাস্ট (High Contrast)</span>
+                </label>
+                <label class="theme-option">
+                  <input type="radio" name="appTheme" value="theme-ink-saver">
+                  <span><i class="fa-solid fa-print"></i> ইংক সেভার / সাদা-কালো (Print Economical)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- NUMBER FORMAT -->
+            <div class="form-group">
+              <label><i class="fa-solid fa-list-ol"></i> সংখ্যার ফরম্যাট:</label>
+              <div class="radio-inline-group">
+                <label><input type="radio" name="numFormat" value="bn" checked> বাংলা সংখ্যা (১, ২, ৩...)</label>
+                <label><input type="radio" name="numFormat" value="en"> English Numbers (1, 2, 3...)</label>
+              </div>
+            </div>
+
+            <!-- TOGGLE OPTIONS -->
+            <div class="form-group">
+              <label><i class="fa-solid fa-toggle-on"></i> অতিরিক্ত অপশন:</label>
+              <div class="toggle-list">
+                <label class="checkbox-toggle">
+                  <input type="checkbox" id="toggleIcons" checked>
+                  <span>সূর্য ও চাঁদের ছবি আইকন দেখান</span>
+                </label>
+                <label class="checkbox-toggle">
+                  <input type="checkbox" id="toggleCheckboxes">
+                  <span>প্রতিটি ওষুধের পাশে টিক দেওয়ার বক্স (Tick Box) রাখুন</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- PAGE ORIENTATION FOR PRINT -->
+            <div class="form-group">
+              <label><i class="fa-solid fa-file"></i> প্রিন্টের পৃষ্ঠা ধরন (Print Orientation):</label>
+              <div class="radio-inline-group">
+                <label><input type="radio" name="pageOrientation" value="landscape" checked> ল্যান্ডস্কেপ (Landscape - পাশাপাশি ৩ কলামের জন্য সেরা)</label>
+                <label><input type="radio" name="pageOrientation" value="portrait"> পোর্ট্রেট (Portrait - লম্বালম্বি)</label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL: REALTIME LIVE PREVIEW (PRINTABLE CANVAS) -->
+    <section class="preview-panel">
+      
+      <div class="preview-toolbar no-print">
+        <div class="preview-title">
+          <i class="fa-solid fa-eye text-primary"></i> <strong>রিয়েল-টাইম প্রিভিউ</strong>
+          <span class="one-page-badge"><i class="fa-solid fa-file-circle-check"></i> ১ পৃষ্ঠায় ফিট (1-Page A4)</span>
+        </div>
+        <div class="preview-actions">
+          <button onclick="window.printChart()" class="btn btn-sm btn-primary">
+            <i class="fa-solid fa-print"></i> ১ পেজে প্রিন্ট / Save as PDF
+          </button>
+          <button onclick="window.exportToPdf()" id="downloadPdfBtn" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-file-pdf text-red"></i> PDF ডাউনলোড
+          </button>
+          <button onclick="window.exportToWord()" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-file-word text-primary"></i> Word (.doc)
+          </button>
+        </div>
+      </div>
+
+
+      <!-- THE PRINTABLE CONTAINER -->
+      <div class="print-wrapper">
+        <div id="medicineSheet" class="medicine-sheet">
+          
+          <!-- SHEET HEADER (CLEAN & MINIMAL: NO SUBTITLE) -->
+          <header class="sheet-header">
+            <div class="header-main">
+              <div class="header-title-box">
+                <h2 class="patient-title-display">
+                  <span id="dispPatientName">আব্দুল ওয়াহাব</span>
+                </h2>
+              </div>
+              <div class="prescription-meta">
+                <div class="meta-item">
+                  <span class="meta-label">তারিখ:</span>
+                  <span class="meta-val" id="dispPrescriptionDate">19 Oct, 2025</span>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <!-- 3-COLUMN PRIMARY SCHEDULE TABLE -->
+          <div class="timetable-grid">
+            
+            <!-- MORNING COLUMN -->
+            <div class="timetable-column morning-col">
+              <div class="column-header">
+                <div class="col-icon morning-icon">
+                  <i class="fa-solid fa-cloud-sun"></i>
+                </div>
+                <h3 class="col-title">সকাল</h3>
+              </div>
+              <div class="column-body">
+                <table class="schedule-table">
+                  <tbody id="previewMorning">
+                    <!-- Populated via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- NOON COLUMN -->
+            <div class="timetable-column noon-col">
+              <div class="column-header">
+                <div class="col-icon noon-icon">
+                  <i class="fa-solid fa-sun"></i>
+                </div>
+                <h3 class="col-title">দুপুর</h3>
+              </div>
+              <div class="column-body">
+                <table class="schedule-table">
+                  <tbody id="previewNoon">
+                    <!-- Populated via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- NIGHT COLUMN -->
+            <div class="timetable-column night-col">
+              <div class="column-header">
+                <div class="col-icon night-icon">
+                  <i class="fa-solid fa-moon"></i>
+                </div>
+                <h3 class="col-title">রাত</h3>
+              </div>
+              <div class="column-body">
+                <table class="schedule-table">
+                  <tbody id="previewNight">
+                    <!-- Populated via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- OTHERS / SPECIAL DAYS SECTION -->
+          <div class="other-section" id="otherSection">
+            <div class="other-header">
+              <div class="other-icon">
+                <i class="fa-solid fa-calendar-check"></i>
+              </div>
+              <div class="other-title-wrap">
+                <h4>অন্যান্য ওষুধ ও বিশেষ দিন (Others / Weekly)</h4>
+                <span>— যেসব ওষুধ বিশেষ বারে খেতে হবে</span>
+              </div>
+            </div>
+            <div class="other-body">
+              <table class="other-table">
+                <thead>
+                  <tr>
+                    <th style="width: 6%; text-align: center;">ক্রম</th>
+                    <th style="width: 44%;">ওষুধের নাম</th>
+                    <th style="width: 20%;">ডোজ / পরিমাণ</th>
+                    <th style="width: 30%;">খাওয়ার দিন বা নিয়ম</th>
+                  </tr>
+                </thead>
+                <tbody id="previewOther">
+                  <!-- Populated via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL FOR EDITING AN EXISTING MEDICINE -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-to-square text-primary"></i> ওষুধ সম্পাদনা করুন</h3>
+        <button class="modal-close" id="closeEditModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editSlot">
+        <input type="hidden" id="editIndex">
+
+        <div class="form-group">
+          <label for="editMedName">ওষুধের নাম ও পাওয়ার:</label>
+          <input type="text" id="editMedName">
+        </div>
+
+        <div class="form-group">
+          <label for="editMedDose">ডোজ / পরিমাণ:</label>
+          <input type="text" id="editMedDose">
+        </div>
+
+        <div class="form-group">
+          <label for="editMealTiming">খাবারের আগে না পরে:</label>
+          <select id="editMealTiming" class="form-select">
+            <option value="খাবার আগে">খাবার আগে (Before Meal)</option>
+            <option value="খাবার পরে">খাবার পরে (After Meal)</option>
+            <option value="খাবারের সাথে">খাবারের সাথে (With Meal)</option>
+            <option value="খালি পেটে">খালি পেটে (Empty Stomach)</option>
+            <option value="">কোনোটি নয়</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="editDaysGroup">
+          <label for="editMedDays">খাওয়ার দিন বা নিয়ম (অন্যান্য ওষুধের ক্ষেত্রে):</label>
+          <input type="text" id="editMedDays" placeholder="উদাঃ রবিবার ও মঙ্গলবার">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="cancelEditBtn">বাতিল</button>
+          <button type="button" class="btn btn-primary" id="saveEditBtn">
+            <i class="fa-solid fa-check"></i> পরিবর্তন সংরক্ষণ করুন
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script src="app.js"></script>
+</body>
+</html>
